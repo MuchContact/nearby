@@ -1,10 +1,12 @@
 package com.larscheng.www.controller;
 
 
+import ch.hsr.geohash.BoundingBox;
 import ch.hsr.geohash.GeoHash;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.larscheng.www.domain.UserGeohash;
+import com.larscheng.www.service.GeoHashQuerySevice;
 import com.larscheng.www.service.UserGeohashService;
 import com.spatial4j.core.context.SpatialContext;
 import com.spatial4j.core.distance.DistanceUtils;
