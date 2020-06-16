@@ -5,9 +5,9 @@ spring:
   application:
     name: nearby-method-three
   datasource:
-    url: jdbc:mysql://127.0.0.1:3306/nearby?characterEncoding=utf8&serverTimezone=UTC
+    url: jdbc:mysql://192.168.99.105:3306/nearby
     username: root
-    password: 123456
+    password: test
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
@@ -48,3 +48,5 @@ mybatis-plus:
   type-aliases-package: com.larscheng.www.domain
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+account:
+  enableCache: true

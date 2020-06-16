@@ -55,6 +55,13 @@
             <artifactId>fastjson</artifactId>
             <version>1.2.54</version>
         </dependency>
+        <!-- JTS is essentially only used for polygons. -->
+        <dependency>
+            <groupId>com.vividsolutions</groupId>
+            <artifactId>jts</artifactId>
+            <!-- last I checked, it still works with 1.12 -->
+            <version>1.13</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -73,15 +80,15 @@
             </plugin>
         </plugins>
 
-        <resources>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.xml</include>
-                </includes>
-                <filtering>true</filtering>
-            </resource>
-        </resources>
+        <!--<resources>-->
+            <!--<resource>-->
+                <!--<directory>src/main/java</directory>-->
+                <!--<includes>-->
+                    <!--<include>**/*.xml</include>-->
+                <!--</includes>-->
+                <!--<filtering>true</filtering>-->
+            <!--</resource>-->
+        <!--</resources>-->
     </build>
 
 </project>

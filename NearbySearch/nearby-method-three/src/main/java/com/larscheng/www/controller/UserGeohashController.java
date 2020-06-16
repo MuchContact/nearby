@@ -32,6 +32,9 @@ public class UserGeohashController {
     @Autowired
     private UserGeohashService userGeohashService;
 
+    @Autowired
+    private GeoHashQuerySevice geoHashQuerySevice;
+
     private SpatialContext spatialContext = SpatialContext.GEO;
     /***
      * 查询用户列表
@@ -85,39 +88,74 @@ public class UserGeohashController {
         return JSON.toJSONString(users);
     }
 
-    /**
-     * 获取附近x米的人
-     *
-     * @param distance 距离范围 单位km
-     * @param len      geoHash的精度
-     * @param userLng  当前经度
-     * @param userLat  当前纬度
-     * @return json
-     */
-    @GetMapping("/nearby")
-    public String nearBySearch(@RequestParam("distance") double distance,
-                               @RequestParam("len") int len,
-                               @RequestParam("userLng") double userLng,
-                               @RequestParam("userLat") double userLat) {
+//
+//    /**
+//     * 获取附近x米的人
+//     *
+//     * @param distance 距离范围 单位km
+//     * @param len      geoHash的精度
+//     * @param userLng  当前经度
+//     * @param userLat  当前纬度
+//     * @return json
+//     */
+//    @GetMapping("/nearby1")
+//    public String nearBySearch1(@RequestParam("distance") double distance,
+//                               @RequestParam("len") int len,
+//                               @RequestParam("userLng") double userLng,
+//                               @RequestParam("userLat") double userLat) {
+//
+//
+//        //1.根据要求的范围，确定geoHash码的精度，获取到当前用户坐标的geoHash码
+//        String geoHashCode = GeohashUtils.encodeLatLon(userLat, userLng, len);
+//        QueryWrapper<UserGeohash> queryWrapper = new QueryWrapper<UserGeohash>()
+//                .likeRight("geo_code",geoHashCode);
+//        //2.匹配指定精度的geoHash码
+//        List<UserGeohash> users = userGeohashService.list(queryWrapper);
+//        //3.过滤超出距离的
+//        users = users.stream()
+//                .filter(a ->getDistance(a.getLongitude(),a.getLatitude(),userLng,userLat)<= distance)
+//                .collect(Collectors.toList());
+//        return JSON.toJSONString(users);
+//    }
+//
+//    /**
+//     * 获取附近x米的人
+//     *
+//     * @param distance 距离范围 单位km
+//     * @param len      geoHash的精度
+//     * @param userLng  当前经度
+//     * @param userLat  当前纬度
+//     * @return json
+//     */
+//    @GetMapping("/nearby")
+//    public String nearBySearch(@RequestParam("distance") double distance,
+//                               @RequestParam("len") int len,
+//                               @RequestParam("userLng") double userLng,
+//                               @RequestParam("userLat") double userLat) {
+//
+//
+//        //根据要求的范围，确定geoHash码的精度，获取到当前用户坐标的geoHash码
+//        GeoHash geoHash = GeoHash.withCharacterPrecision(userLat, userLng, len);
+//        //获取到用户周边8个方位的geoHash码
+//        GeoHash[] adjacent = geoHash.getAdjacent();
+//
+//        QueryWrapper<UserGeohash> queryWrapper = new QueryWrapper<UserGeohash>().likeRight("geo_code",geoHash.toBase32());
+//        Stream.of(adjacent).forEach(a -> queryWrapper.or().likeRight("geo_code",a.toBase32()));
+//
+//        //匹配指定精度的geoHash码
+//        List<UserGeohash> users = userGeohashService.list(queryWrapper);
+//        //过滤超出距离的
+//        users = users.stream()
+//                .filter(a ->getDistance(a.getLongitude(),a.getLatitude(),userLng,userLat)<= distance)
+//                .collect(Collectors.toList());
+//        return JSON.toJSONString(users);
+//    }
 
-
-        //根据要求的范围，确定geoHash码的精度，获取到当前用户坐标的geoHash码
-        GeoHash geoHash = GeoHash.withCharacterPrecision(userLat, userLng, len);
-        //获取到用户周边8个方位的geoHash码
-        GeoHash[] adjacent = geoHash.getAdjacent();
-
-        QueryWrapper<UserGeohash> queryWrapper = new QueryWrapper<UserGeohash>().likeRight("geo_code",geoHash.toBase32());
-        Stream.of(adjacent).forEach(a -> queryWrapper.or().likeRight("geo_code",a.toBase32()));
-
-        //匹配指定精度的geoHash码
-        List<UserGeohash> users = userGeohashService.list(queryWrapper);
-        //过滤超出距离的
-        users = users.stream()
-                .filter(a ->getDistance(a.getLongitude(),a.getLatitude(),userLng,userLat)<= distance)
-                .collect(Collectors.toList());
-        return JSON.toJSONString(users);
+    @GetMapping("/all-geohash")
+    public String getAllGeoHashes(@RequestParam("len") int len,
+                                  @RequestParam("polygon") String polygon){
+        return geoHashQuerySevice.getAllGeoHash(polygon, len);
     }
-
 
     /***
      * 球面中，两点间的距离
@@ -130,6 +168,15 @@ public class UserGeohashController {
     private double getDistance(Double longitude, Double latitude, double userLng, double userLat) {
         return spatialContext.calcDistance(spatialContext.makePoint(userLng, userLat),
                 spatialContext.makePoint(longitude, latitude)) * DistanceUtils.DEG_TO_KM;
+    }
+
+    public static void main(String[] args) {
+        GeoHash geoHash = GeoHash.fromGeohashString("wt3mu00m");
+        BoundingBox boundingBox = geoHash.getBoundingBox();
+        System.out.println(boundingBox);
+        String template = "https://www.openstreetmap.org/?minlon=%f&minlat=%f&maxlon=%f&maxlat=%f#map=13/%f/%f";
+        String format = String.format(template, boundingBox.getMinLon(), boundingBox.getMinLat(), boundingBox.getMaxLon(), boundingBox.getMaxLat(), boundingBox.getCenterPoint().getLatitude(), boundingBox.getCenterPoint().getLongitude());
+        System.out.println(format);
     }
 
 }
